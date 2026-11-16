@@ -11,14 +11,8 @@ import com.taxify.vehicle.VehicleStatus;
 
 import java.util.List;
 
-/**
- * The ride-hailing company. Matches ride and rental requests to vehicles and
- * reacts to vehicles arriving at pickup and drop-off points. Acts as the
- * subject in the Observer pattern: every event is reported to the observer.
- */
 public final class TaxiCompany implements ITaxiCompany, ISubject {
 
-    /** Maximum number of passengers that can share one taxi or shuttle ride. */
     public static final int MAX_SHARED_RIDERS = 2;
 
     private final String name;
@@ -27,12 +21,6 @@ public final class TaxiCompany implements ITaxiCompany, ISubject {
     private int totalServices;
     private IObserver observer;
 
-    /**
-     * Initializes company and links users and vehicles.
-     * @param name company name
-     * @param users users list
-     * @param vehicles vehicles list
-     */
     public TaxiCompany(String name, List<IUser> users, List<IVehicle> vehicles) {
         this.name = name;
         this.users = users;
@@ -48,27 +36,17 @@ public final class TaxiCompany implements ITaxiCompany, ISubject {
         }
     }
 
-    /** @return company name */
     @Override
     public String getName() {
         return this.name;
     }
 
-    /** @return number of services the company has assigned */
     @Override
     public int getTotalServices() {
         return this.totalServices;
     }
 
-    /**
-     * Assigns a taxi or shuttle ride to a user. A free vehicle is preferred; if
-     * none is available, the user may join a vehicle that is on its way to pick
-     * up another passenger, but only if every passenger agrees to share.
-     * @param userId user ID
-     * @param pinkRide require a female driver
-     * @param rideMode Standard or Silent ride
-     * @return true if the ride was assigned
-     */
+    // use a free vehicle if there is one, otherwise try to share a ride that's still heading to a pickup
     @Override
     public boolean provideService(int userId, boolean pinkRide, RideMode rideMode) {
         IUser user = findUser(userId);
@@ -113,14 +91,7 @@ public final class TaxiCompany implements ITaxiCompany, ISubject {
         return true;
     }
 
-    /**
-     * Rents the nearest free bike or scooter to a user. The user is placed at a
-     * random location, walks to the nearest matching vehicle, and rides it to a
-     * random destination.
-     * @param userId user ID
-     * @param vehicleType type of rental: SCOOTER or BIKE
-     * @return true if a vehicle was rented
-     */
+    // user starts at a random spot and takes the closest free bike/scooter
     @Override
     public boolean provideRentalService(int userId, RentalVehicleType vehicleType) {
         IUser user = findUser(userId);
@@ -153,10 +124,6 @@ public final class TaxiCompany implements ITaxiCompany, ISubject {
         return true;
     }
 
-    /**
-     * Called when a vehicle reaches the pickup location.
-     * @param vehicle vehicle
-     */
     @Override
     public void arrivedAtPickupLocation(IVehicle vehicle) {
         IService service = vehicle.getService();
@@ -165,11 +132,7 @@ public final class TaxiCompany implements ITaxiCompany, ISubject {
         vehicle.startService();
     }
 
-    /**
-     * Called when a vehicle reaches the drop-off location. Every passenger may
-     * rate the ride and is released, then the vehicle records the trip.
-     * @param vehicle vehicle
-     */
+    // passengers can rate the ride, then they're released
     @Override
     public void arrivedAtDropoffLocation(IVehicle vehicle) {
         IService service = vehicle.getService();
@@ -185,19 +148,11 @@ public final class TaxiCompany implements ITaxiCompany, ISubject {
         vehicle.endService(service.getUsers().size());
     }
 
-    /**
-     * Registers the observer that receives event messages.
-     * @param observer observer
-     */
     @Override
     public void addObserver(IObserver observer) {
         this.observer = observer;
     }
 
-    /**
-     * Sends a message to the observer, if one is registered.
-     * @param message message
-     */
     @Override
     public void notifyObserver(String message) {
         if (this.observer != null) {
@@ -205,12 +160,6 @@ public final class TaxiCompany implements ITaxiCompany, ISubject {
         }
     }
 
-    /**
-     * Finds the free rental vehicle of the given type closest to a location.
-     * @param vehicleType type of rental: SCOOTER or BIKE
-     * @param location where the user is standing
-     * @return the index of the nearest free rental vehicle, or -1 if none
-     */
     @Override
     public int findNearestRental(RentalVehicleType vehicleType, ILocation location) {
         int nearestIndex = -1;
@@ -230,11 +179,6 @@ public final class TaxiCompany implements ITaxiCompany, ISubject {
         return nearestIndex;
     }
 
-    /**
-     * Finds the first free taxi or shuttle. Pink rides need a female driver.
-     * @param pinkRide require a female driver
-     * @return a free vehicle, or null if none
-     */
     private IVehicle findFreeVehicle(boolean pinkRide) {
         for (IVehicle vehicle : this.vehicles) {
             if (vehicle instanceof Vehicle && vehicle.isFree() && driverAllowed(vehicle, pinkRide)) {
@@ -244,13 +188,7 @@ public final class TaxiCompany implements ITaxiCompany, ISubject {
         return null;
     }
 
-    /**
-     * Finds a taxi or shuttle still on its way to a pickup whose ride matches
-     * the requested options and has a free seat.
-     * @param pinkRide require a pink ride
-     * @param rideMode required ride mode
-     * @return a vehicle whose ride can be shared, or null if none
-     */
+    // vehicle still on the way to a pickup, same ride options, and a free seat
     private IVehicle findSharableVehicle(boolean pinkRide, RideMode rideMode) {
         for (IVehicle vehicle : this.vehicles) {
             if (vehicle instanceof Vehicle taxi && taxi.getStatus() == VehicleStatus.PICKUP) {
@@ -296,11 +234,6 @@ public final class TaxiCompany implements ITaxiCompany, ISubject {
         return ids.toString();
     }
 
-    /**
-     * Finds a user by ID.
-     * @param id user ID
-     * @return the user, or null if not found
-     */
     private IUser findUser(int id) {
         for (IUser user : this.users) {
             if (user.getId() == id) {

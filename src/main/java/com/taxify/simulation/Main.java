@@ -16,23 +16,15 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Entry point. Builds a city with users, taxis, shuttles, bikes and scooters,
- * runs the simulation and prints per-vehicle statistics.
- *
- * <p>Usage: {@code ./gradlew run --args="<seed>"}. Passing a seed makes the run
- * reproducible; without one a random seed is chosen and printed.
- */
 public final class Main {
 
-    /** Number of ticks during which new requests are issued. */
     private static final int REQUEST_TICKS = 60;
-    /** Safety limit for the wind-down phase after requests stop. */
     private static final int MAX_DRAIN_TICKS = 500;
 
     private Main() {
     }
 
+    // usage: ./gradlew run --args="<seed>" (random seed if none given)
     public static void main(String[] args) {
         long seed = args.length > 0 ? Long.parseLong(args[0]) : System.nanoTime();
         ApplicationLibrary.setSeed(seed);

@@ -10,32 +10,18 @@ import com.taxify.vehicle.RentalVehicleType;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * ApplicationSimulator acts as the main orchestrator of the taxi company simulation.
- * It observes the company, updates vehicle movement, triggers service requests,
- * and displays system status and statistics.
- */
 public class ApplicationSimulator implements IApplicationSimulator, IObserver {
 
     private final ITaxiCompany company;
     private final List<IUser> users;
     private final List<IVehicle> vehicles;
 
-    /**
-     * Creates the simulator for a company and its users and fleet.
-     * @param company the taxi company
-     * @param users all users
-     * @param vehicles all vehicles (taxis, shuttles, bikes and scooters)
-     */
     public ApplicationSimulator(ITaxiCompany company, List<IUser> users, List<IVehicle> vehicles) {
         this.company = company;
         this.users = users;
         this.vehicles = vehicles;
     }
 
-    /**
-     * Displays the current status of all vehicles in the simulation.
-     */
     @Override
     public void show() {
         System.out.println("\n" + this.company.getName() + " status \n");
@@ -45,10 +31,6 @@ public class ApplicationSimulator implements IApplicationSimulator, IObserver {
         }
     }
 
-    /**
-     * Prints aggregated statistics for each vehicle:
-     * services completed, distance traveled, billing, reviews and average stars.
-     */
     @Override
     public void showStatistics() {
         StringBuilder s = new StringBuilder("\n" + this.company.getName() + " statistics\n");
@@ -67,9 +49,6 @@ public class ApplicationSimulator implements IApplicationSimulator, IObserver {
         System.out.println(s);
     }
 
-    /**
-     * Moves every vehicle one step along its route.
-     */
     @Override
     public void update() {
         for (IVehicle vehicle : this.vehicles) {
@@ -77,13 +56,6 @@ public class ApplicationSimulator implements IApplicationSimulator, IObserver {
         }
     }
 
-    /**
-     * Requests a ride for a random user who is free. For pink rides, only
-     * eligible users (women and children) are considered.
-     * @param pinkRide if a ride is by women, for women/children
-     * @param rideMode if a ride is Silent or Standard
-     * @return true if a ride was assigned
-     */
     @Override
     public boolean requestService(boolean pinkRide, RideMode rideMode) {
         IUser user = randomFreeUser(pinkRide);
@@ -93,11 +65,6 @@ public class ApplicationSimulator implements IApplicationSimulator, IObserver {
         return this.company.provideService(user.getId(), pinkRide, rideMode);
     }
 
-    /**
-     * Requests a rental for a random user who is free.
-     * @param vehicleType SCOOTER or BIKE
-     * @return true if a vehicle was rented
-     */
     @Override
     public boolean requestRentalService(RentalVehicleType vehicleType) {
         IUser user = randomFreeUser(false);
@@ -107,10 +74,6 @@ public class ApplicationSimulator implements IApplicationSimulator, IObserver {
         return this.company.provideRentalService(user.getId(), vehicleType);
     }
 
-    /**
-     * Whether every vehicle is free.
-     * @return true if no vehicle is serving a request
-     */
     @Override
     public boolean allVehiclesFree() {
         for (IVehicle vehicle : this.vehicles) {
@@ -121,17 +84,11 @@ public class ApplicationSimulator implements IApplicationSimulator, IObserver {
         return true;
     }
 
-    /**
-     * Returns the total number of services assigned by the company.
-     */
     @Override
     public int getTotalServices() {
         return this.company.getTotalServices();
     }
 
-    /**
-     * Observer callback: prints any message sent by the observed subject.
-     */
     @Override
     public void updateObserver(String message) {
         System.out.println(message);

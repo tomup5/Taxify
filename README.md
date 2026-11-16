@@ -8,13 +8,13 @@ A ride-hailing and micro-mobility simulation written in object-oriented Java. Us
 
 ## Features
 
-- **Ride matching**: assigns each request to a free taxi or shuttle; requests from users already on a ride are rejected.
-- **Shared rides**: when no vehicle is free, a user can join a ride that is on its way to a pickup (up to 2 riders). Every passenger has to agree, and the ride mode has to match. Each rider pays 60% of the fare.
-- **Pink rides**: rides with a female driver, offered to women and children.
-- **Ride modes**: Standard or Silent.
-- **Micro-mobility rentals**: finds the nearest free bike or scooter. Each ride uses 25% of a scooter's battery, and a scooter recharges before a ride if its battery is at 25% or lower.
-- **Per-vehicle statistics**: services, distance, billing, reviews and average rating.
-- **Reproducible runs**: all randomness comes from one seedable source, so a given seed always produces the same simulation.
+- Ride matching: each request goes to a free taxi or shuttle, and requests from users already on a ride are rejected.
+- Shared rides: when no vehicle is free, a user can join a ride that is on its way to a pickup (up to 2 riders). Every passenger has to agree, and the ride mode has to match. Each rider pays 60% of the fare.
+- Pink rides: rides with a female driver, offered to women and children.
+- Ride modes: Standard or Silent.
+- Micro-mobility rentals: finds the nearest free bike or scooter. Each ride uses 25% of a scooter's battery, and a scooter recharges before a ride if its battery is at 25% or lower.
+- Per-vehicle statistics: services, distance, billing, reviews and average rating.
+- Reproducible runs: all randomness comes from one seedable source, so a given seed always produces the same simulation.
 
 ### Pricing
 
@@ -68,10 +68,10 @@ Bike    102  2 services  21 km.   7.25 eur.  2 reviews 3.50 stars
 
 *Full-size diagram: [docs/class-diagram.png](docs/class-diagram.png)*
 
-- **Program to interfaces.** Every major component sits behind an interface (`ITaxiCompany`, `IVehicle`, `IService`, `IUser`, `IRoute` and others), and the classes depend on those interfaces rather than on each other.
-- **Observer pattern.** `TaxiCompany` is the subject (`ISubject`) and `ApplicationSimulator` is the observer (`IObserver`). Every event (request, pickup, drop-off, battery update) is sent to the observer, so the company logic never prints anything itself.
-- **Inheritance for vehicle types.** `Taxi` and `Shuttle` extend the abstract `Vehicle`; `Bike` and `Scooter` extend `MicroVehicle`. Subclasses override `calculateCost()` for their pricing, and `Scooter` overrides `startService()` and `endService()` to manage its battery. `User` and `Driver` both extend `Person`.
-- **Enums for state.** `VehicleStatus` (FREE → PICKUP → SERVICE), `MicroVehicleStatus` (FREE → BOOKED → RIDING), `RideMode` and `RentalVehicleType` replace free-text strings and flags.
+- Classes talk to each other through interfaces (`ITaxiCompany`, `IVehicle`, `IService`, `IUser`, `IRoute`, ...).
+- Observer pattern: `TaxiCompany` is the subject and `ApplicationSimulator` is the observer. The company sends every event (request, pickup, drop-off) to the observer, which does all the printing.
+- `Taxi` and `Shuttle` extend `Vehicle`, and `Bike` and `Scooter` extend `MicroVehicle`. Each one overrides `calculateCost()`, and `Scooter` also handles its battery in `startService()`/`endService()`. `User` and `Driver` extend `Person`.
+- Enums for state: `VehicleStatus` (FREE, PICKUP, SERVICE), `MicroVehicleStatus` (FREE, BOOKED, RIDING), `RideMode` and `RentalVehicleType`.
 
 ### How a ride works
 
@@ -90,16 +90,16 @@ src/main/java/com/taxify/
 ├── map/          Location, Route (grid movement)
 └── simulation/   Main, ApplicationSimulator, ApplicationLibrary (seedable RNG, distance)
 src/test/java/com/taxify/    JUnit 5 tests
-docs/                        class diagram and the Java2D program that draws it
+docs/                        class diagram
 ```
 
 ## Testing
 
 There are 51 JUnit 5 tests, and GitHub Actions runs them on every push.
 
-- **Unit tests**: routing, fares, shared-ride billing, scooter battery, statistics, pink-ride eligibility.
-- **Ride assignment tests**: double-booking prevention, pink rides only going to female drivers, sharing consent and capacity, nearest-rental search, the full pickup-to-drop-off lifecycle.
-- **Simulation tests**: 15 seeded simulations. After every step, each test checks that no user is in two rides at once and that each user's riding flag matches the vehicles. At the end, it checks that every ride finished.
+- Unit tests: routing, fares, shared-ride billing, scooter battery, statistics, pink-ride eligibility.
+- Ride assignment tests: double-booking prevention, pink rides only going to female drivers, sharing consent and capacity, nearest-rental search, the full pickup-to-drop-off lifecycle.
+- Simulation tests: 15 seeded simulations. After every step, each test checks that no user is in two rides at once and that each user's riding flag matches the vehicles. At the end, it checks that every ride finished.
 
 ## Project history
 
